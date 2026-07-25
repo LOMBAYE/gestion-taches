@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { Observable, switchMap, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { AuthResponse, User } from '../models/models';
 
@@ -11,11 +11,7 @@ const USER_KEY = 'tm_user';
 export class AuthService {
   currentUser = signal<User | null>(this.readStoredUser());
 
-  constructor(private http: HttpClient) {
-    console.log(this.currentUser());
-      console.log(this.currentUser()?.role);
-
-    }
+  constructor(private http: HttpClient) {}
 
   login(email: string, password: string): Observable<AuthResponse> {
     return this.http
@@ -31,8 +27,8 @@ export class AuthService {
     role?: string;
   }): Observable<AuthResponse> {
     return this.http
-      .post<AuthResponse>(`${environment.apiUrl}/auth/register`, payload)
-      .pipe(tap((res) => this.setSession(res)));
+      .post<{ message: string; utilisateur: User }>(`${environment.apiUrl}/auth/register`, payload)
+      .pipe(switchMap(() => this.login(payload.email, payload.password)));
   }
 
   logout(): void {
@@ -60,8 +56,14 @@ export class AuthService {
     this.currentUser.set(res.utilisateur);
   }
 
-  private readStoredUser(): User | null {
-    const raw = localStorage.getItem(USER_KEY);
-    return raw ? JSON.parse(raw) : null;
+private readStoredUser(): User | null {
+  const raw = localStorage.getItem(USER_KEY);
+  if (!raw || raw === 'undefined') return null;
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return null;
   }
+}
+
 }
