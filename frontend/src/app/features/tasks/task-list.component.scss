@@ -1,0 +1,81 @@
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.75rem; }
+h1 { margin: 0; font-size: 1.6rem; font-weight: 700; }
+.subtitle { margin: 0.25rem 0 0; color: var(--text-muted); font-size: 0.88rem; }
+.btn-primary {
+  background: var(--brand); color: white; padding: 0.6rem 1.1rem;
+  border-radius: 10px; text-decoration: none; font-size: 0.85rem; font-weight: 600;
+}
+.btn-primary:hover { background: var(--brand-dark); }
+.error { color: #dc2626; }
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(240px, 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+
+.column {
+  background: #eef0f6;
+  border-radius: 14px;
+  padding: 0.85rem;
+  min-height: 200px;
+}
+.column-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.4rem 0.85rem;
+}
+.col-dot { width: 8px; height: 8px; border-radius: 50%; }
+.dot-brouillon { background: var(--status-brouillon); }
+.dot-soumise { background: var(--status-soumise); }
+.dot-validee { background: var(--status-validee); }
+.dot-rejetee { background: var(--status-rejetee); }
+.col-title { font-weight: 600; font-size: 0.85rem; flex: 1; }
+.col-count {
+  font-size: 0.72rem;
+  background: white;
+  color: var(--text-muted);
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+}
+
+.column-body { display: flex; flex-direction: column; gap: 0.7rem; }
+.empty-column { font-size: 0.78rem; color: var(--text-faint); text-align: center; padding: 1rem 0; }
+
+.task-card {
+  background: white;
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+.task-card h3 { margin: 0 0 0.35rem; font-size: 0.9rem; }
+.description {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 0 0 0.4rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.creator { font-size: 0.72rem; color: var(--text-faint); margin: 0 0 0.5rem; }
+
+.actions { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.actions a, .actions button {
+  font-size: 0.72rem;
+  padding: 0.32rem 0.6rem;
+  border-radius: 7px;
+  border: 1px solid var(--border);
+  background: white;
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--text);
+}
+.actions button.success { background: var(--status-validee); color: white; border-color: var(--status-validee); }
+.actions button.danger { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
+
+@media (max-width: 1024px) {
+  .board { grid-template-columns: repeat(2, 1fr); }
+}

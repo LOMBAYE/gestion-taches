@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+enum Role {
+  COLLABORATEUR
+  MANAGER
+  ADMINISTRATEUR
+}
+
+
+enum Statut {
+  BROUILLON
+  SOUMISE
+  VALIDEE
+  REJETEE
+}
+
+
+model Utilisateur {
+
+  id          String @id @default(uuid())
+
+  nom         String
+  prenom      String
+
+  email       String @unique
+
+  password  String
+
+  role        Role
+
+  taches      Tache[]
+}
+
+
+model Tache {
+
+  id                     String @id @default(uuid())
+
+  titre                  String
+
+  description            String
+
+  statut                 Statut @default(BROUILLON)
+
+  dateCreation           DateTime @default(now())
+
+  derniereModification   DateTime @updatedAt
+
+
+  createurId             String
+
+  createur               Utilisateur @relation( fields: [createurId], references: [id])
+
+}

@@ -1,0 +1,65 @@
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+h1 { margin: 0; font-size: 1.6rem; font-weight: 700; }
+.subtitle { margin: 0.25rem 0 0; color: var(--text-muted); font-size: 0.85rem; }
+.search {
+  padding: 0.55rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 0.85rem;
+  width: 240px;
+  background: var(--bg);
+}
+.search:focus { outline: none; border-color: var(--brand); }
+
+.tabs { display: flex; gap: 0.5rem; margin-bottom: 1.25rem; }
+.tabs button {
+  padding: 0.45rem 1rem;
+  border: 1px solid var(--border);
+  background: white;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+.tabs button.active { background: var(--brand); color: white; border-color: var(--brand); }
+
+.table-card {
+  background: var(--surface);
+  border-radius: 14px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+table { width: 100%; border-collapse: collapse; }
+th {
+  text-align: left;
+  padding: 0.9rem 1.25rem;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-faint);
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+td { padding: 0.85rem 1.25rem; font-size: 0.87rem; border-bottom: 1px solid #f3f4f6; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: #fafafa; }
+.muted { color: var(--text-muted); }
+.empty { text-align: center; color: var(--text-faint); padding: 2rem; }
+
+.user-cell { display: flex; align-items: center; gap: 0.65rem; font-weight: 500; }
+.avatar {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: white;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.72rem; font-weight: 700;
+}
+
+.role-badge, .status-badge { padding: 0.25rem 0.65rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+.role-admin { background: #ede9fe; color: var(--role-admin); }
+.role-manager { background: #dbeafe; color: var(--role-manager); }
+.role-collab { background: #d1fae5; color: var(--role-collab); }
+.status-brouillon { background: #f3f4f6; color: #4b5563; }
+.status-soumise { background: #fef3c7; color: #b45309; }
+.status-validee { background: #d1fae5; color: #047857; }
+.status-rejetee { background: #fee2e2; color: #b91c1c; }

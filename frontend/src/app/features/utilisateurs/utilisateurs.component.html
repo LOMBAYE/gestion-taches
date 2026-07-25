@@ -1,0 +1,64 @@
+<div class="page-header">
+  <div>
+    <h1>Utilisateurs</h1>
+    <p class="subtitle">{{ users().length }} membres · {{ tasks().length }} tâches au total</p>
+  </div>
+  @if (tab() === 'users') {
+    <input
+      class="search"
+      type="text"
+      placeholder="🔍 Rechercher..."
+      [value]="search()"
+      (input)="search.set($any($event.target).value)"
+    />
+  }
+</div>
+
+<div class="tabs">
+  <button [class.active]="tab() === 'users'" (click)="tab.set('users')">Utilisateurs</button>
+  <button [class.active]="tab() === 'tasks'" (click)="tab.set('tasks')">Toutes les tâches</button>
+</div>
+
+@if (loading()) {
+  <p>Chargement...</p>
+} @else {
+  <div class="table-card">
+    @if (tab() === 'users') {
+      <table>
+        <tbody>
+          @for (u of filteredUsers(); track u.id) {
+            <tr>
+              <td>
+                <div class="user-cell">
+                  <span class="avatar">{{ initials(u) }}</span>
+                  <span>{{ u?.prenom }} {{ u?.nom }}</span>
+                </div>
+              </td>
+              <td class="muted">{{ u.email }}</td>
+              <td><span class="role-badge" [class]="roleClass(u.role)">{{ roleLabel(u.role) }}</span></td>
+            </tr>
+          } @empty {
+            <tr><td colspan="4" class="empty">Aucun utilisateur trouvé.</td></tr>
+          }
+        </tbody>
+      </table>
+    } @else {
+      <table>
+        <thead>
+          <tr><th>Titre</th><th>Créateur</th><th>Statut</th></tr>
+        </thead>
+        <tbody>
+          @for (t of tasks(); track t.id) {
+            <tr>
+              <td>{{ t.titre }}</td>
+              <td class="muted">{{ t.createur?.prenom }} {{ t.createur?.nom }}</td>
+              <td><span class="status-badge" [class]="'status-' + t.statut.toLowerCase()">{{ statusLabel(t.statut) }}</span></td>
+            </tr>
+          } @empty {
+            <tr><td colspan="3" class="empty">Aucune tâche.</td></tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+}

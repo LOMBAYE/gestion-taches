@@ -1,0 +1,62 @@
+<div class="d-flex align-items-center justify-content-center min-vh-100 px-3 py-4">
+  <div class="card shadow-sm" style="max-width: 460px; width: 100%;">
+    <div class="card-body p-4 p-md-5">
+      <div class="text-center mb-4">
+        <div class="brand-icon mx-auto mb-3">
+          <i class="bi bi-person-plus"></i>
+        </div>
+        <h1 class="h4 fw-bold mb-1">Créer un compte</h1>
+        <p class="text-muted small mb-0">Rejoignez la plateforme de gestion de tâches</p>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <div class="row">
+          <div class="col-6 mb-3">
+            <label class="form-label small fw-semibold" for="prenom">Prénom</label>
+            <input id="prenom" type="text" class="form-control" formControlName="prenom" />
+          </div>
+          <div class="col-6 mb-3">
+            <label class="form-label small fw-semibold" for="nom">Nom</label>
+            <input id="nom" type="text" class="form-control" formControlName="nom" />
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label small fw-semibold" for="reg-email">Email</label>
+          <input id="reg-email" type="email" class="form-control" formControlName="email" />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label small fw-semibold" for="reg-password">Mot de passe</label>
+          <input id="reg-password" type="password" class="form-control" formControlName="password" />
+          <div class="form-text">6 caractères minimum.</div>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label small fw-semibold" for="role">Rôle</label>
+          <select id="role" class="form-select" formControlName="role">
+            <option value="COLLABORATEUR">Collaborateur</option>
+            <option value="MANAGER">Manager</option>
+            <option value="ADMINISTRATEUR">Administrateur</option>
+          </select>
+        </div>
+
+        @if (errorMessage()) {
+          <div class="alert alert-danger py-2 small" role="alert">{{ errorMessage() }}</div>
+        }
+
+        <button type="submit" class="btn btn-primary w-100 fw-semibold" [disabled]="form.invalid || loading()">
+          @if (loading()) {
+            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+          }
+          {{ loading() ? 'Création...' : 'Créer mon compte' }}
+        </button>
+
+        <p class="text-center small text-muted mt-3 mb-0">
+          Déjà un compte ?
+          <a routerLink="/login" class="text-primary text-decoration-none fw-semibold">Se connecter</a>
+        </p>
+      </form>
+    </div>
+  </div>
+</div>

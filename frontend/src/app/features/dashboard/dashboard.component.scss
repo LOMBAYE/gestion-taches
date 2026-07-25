@@ -1,0 +1,72 @@
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.75rem;
+}
+h1 { margin: 0; font-size: 1.6rem; font-weight: 700; }
+.subtitle { margin: 0.25rem 0 0; color: var(--text-muted); font-size: 0.88rem; }
+
+.btn-primary {
+  background: var(--brand);
+  color: white;
+  padding: 0.6rem 1.1rem;
+  border-radius: 10px;
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.btn-primary:hover { background: var(--brand-dark); }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+.stat-card {
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 1.25rem 1.4rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border-left: 4px solid var(--text-faint);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.stat-value { font-size: 1.7rem; font-weight: 700; }
+.stat-label { font-size: 0.78rem; color: var(--text-muted); }
+.accent-brouillon { border-left-color: var(--status-brouillon); }
+.accent-soumise { border-left-color: var(--status-soumise); }
+.accent-validee { border-left-color: var(--status-validee); }
+.accent-admin { border-left-color: var(--role-admin); }
+
+.section-card {
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+.section-header h2 { margin: 0; font-size: 1.05rem; }
+.section-header a { font-size: 0.8rem; color: var(--brand); text-decoration: none; }
+.empty { color: var(--text-faint); font-size: 0.85rem; }
+
+.mini-list { display: flex; flex-direction: column; gap: 0.6rem; }
+.mini-row {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.6rem 0.7rem;
+  border-radius: 10px;
+  font-size: 0.85rem;
+}
+.mini-row:hover { background: var(--bg); }
+.dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.dot-brouillon { background: var(--status-brouillon); }
+.dot-soumise { background: var(--status-soumise); }
+.dot-validee { background: var(--status-validee); }
+.dot-rejetee { background: var(--status-rejetee); }
+.mini-title { flex: 1; font-weight: 500; }
+.mini-author { color: var(--text-faint); font-size: 0.78rem; }
+.mini-status { color: var(--text-muted); font-size: 0.78rem; }

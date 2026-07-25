@@ -1,0 +1,37 @@
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="logo">
+      <span class="logo-mark">T</span>
+      <span>TaskFlow</span>
+    </div>
+
+    <nav>
+      <a routerLink="/dashboard" routerLinkActive="active">
+        <span class="icon">🏠</span> Dashboard
+      </a>
+      <a routerLink="/taches" routerLinkActive="active">
+        <span class="icon">📋</span> Tâches
+      </a>
+      @if (auth.hasRole('ADMINISTRATEUR')) {
+        <a routerLink="/utilisateurs" routerLinkActive="active">
+          <span class="icon">👥</span> Utilisateurs
+        </a>
+      }
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-chip">
+        <span class="avatar">{{ initials() }}</span>
+        <div class="user-info">
+          <strong>{{ auth.currentUser()?.prenom }} {{ auth.currentUser()?.nom }}</strong>
+          <span>{{ roleLabel() }}</span>
+        </div>
+      </div>
+      <button class="logout-btn" (click)="logout()" title="Déconnexion">⏻</button>
+    </div>
+  </aside>
+
+  <main class="content">
+    <router-outlet></router-outlet>
+  </main>
+</div>

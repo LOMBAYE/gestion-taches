@@ -1,0 +1,60 @@
+<div class="page-header">
+  <div>
+    <h1>Bonjour {{ auth.currentUser()?.prenom }} 👋</h1>
+    <p class="subtitle">Voici un aperçu de votre activité</p>
+  </div>
+  <a class="btn-primary" routerLink="/taches/new">+ Nouvelle tâche</a>
+</div>
+
+@if (loading()) {
+  <p>Chargement...</p>
+} @else {
+  <div class="stats-grid">
+    <div class="stat-card">
+      <span class="stat-value">{{ counts().total }}</span>
+      <span class="stat-label">Total tâches</span>
+    </div>
+    <div class="stat-card accent-brouillon">
+      <span class="stat-value">{{ counts().brouillon }}</span>
+      <span class="stat-label">Brouillons</span>
+    </div>
+    <div class="stat-card accent-soumise">
+      <span class="stat-value">{{ counts().soumise }}</span>
+      <span class="stat-label">En attente</span>
+    </div>
+    <div class="stat-card accent-validee">
+      <span class="stat-value">{{ counts().validee }}</span>
+      <span class="stat-label">Validées</span>
+    </div>
+    @if (auth.hasRole('ADMINISTRATEUR') && userCount() !== null) {
+      <div class="stat-card accent-admin">
+        <span class="stat-value">{{ userCount() }}</span>
+        <span class="stat-label">Utilisateurs</span>
+      </div>
+    }
+  </div>
+
+  <div class="section-card">
+    <div class="section-header">
+      <h2>Activité récente</h2>
+      <a routerLink="/taches">Voir tout →</a>
+    </div>
+
+    @if (recentTasks().length === 0) {
+      <p class="empty">Aucune tâche pour le moment.</p>
+    } @else {
+      <div class="mini-list">
+        @for (task of recentTasks(); track task.id) {
+          <div class="mini-row">
+            <span class="dot" [class]="'dot-' + task.statut.toLowerCase()"></span>
+            <span class="mini-title">{{ task.titre }}</span>
+            @if (task.createur && auth.hasRole('MANAGER', 'ADMINISTRATEUR')) {
+              <span class="mini-author">{{ task.createur.prenom }} {{ task.createur.nom }}</span>
+            }
+            <span class="mini-status">{{ statusLabel(task.statut) }}</span>
+          </div>
+        }
+      </div>
+    }
+  </div>
+}

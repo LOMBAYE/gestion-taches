@@ -1,0 +1,32 @@
+* { box-sizing: border-box; }
+
+:root {
+  --brand: #4f46e5;
+  --brand-light: #eef2ff;
+  --brand-dark: #4338ca;
+  --bg: #f6f7fb;
+  --surface: #ffffff;
+  --border: #e5e7eb;
+  --text: #111827;
+  --text-muted: #6b7280;
+  --text-faint: #9ca3af;
+
+  --status-brouillon: #9ca3af;
+  --status-soumise: #f59e0b;
+  --status-validee: #10b981;
+  --status-rejetee: #ef4444;
+
+  --role-admin: #7c3aed;
+  --role-manager: #2563eb;
+  --role-collab: #059669;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+button { font-family: inherit; }

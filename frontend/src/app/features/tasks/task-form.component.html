@@ -1,0 +1,28 @@
+<div class="page-header">
+  <h1>{{ taskId() ? 'Modifier la tâche' : 'Nouvelle tâche' }}</h1>
+</div>
+
+<form class="form-card" [formGroup]="form" (ngSubmit)="submit()">
+  <label>
+    Titre
+    <input type="text" formControlName="titre" placeholder="Ex : Rédiger le rapport mensuel" />
+  </label>
+
+  <label>
+    Description
+    <textarea rows="6" formControlName="description" placeholder="Détaillez la tâche à réaliser..."></textarea>
+  </label>
+
+  @if (errorMessage()) {
+    <p class="error">{{ errorMessage() }}</p>
+  }
+
+  <div class="form-actions">
+    <button type="button" class="secondary" (click)="cancel()" [disabled]="loading()">
+      Annuler
+    </button>
+    <button type="submit" [disabled]="form.invalid || loading()">
+      {{ loading() ? 'Enregistrement...' : 'Enregistrer' }}
+    </button>
+  </div>
+</form>

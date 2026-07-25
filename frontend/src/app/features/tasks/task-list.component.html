@@ -1,0 +1,51 @@
+<div class="page-header">
+  <div>
+    <h1>{{ auth.hasRole('COLLABORATEUR') ? 'Mes tâches' : 'Toutes les tâches' }}</h1>
+    <p class="subtitle">Suivez le cycle de vie de chaque tâche</p>
+  </div>
+  <a class="btn-primary" routerLink="/taches/new">+ Nouvelle tâche</a>
+</div>
+
+@if (loading()) {
+  <p>Chargement...</p>
+} @else if (errorMessage()) {
+  <p class="error">{{ errorMessage() }}</p>
+} @else {
+  <div class="board">
+    @for (col of columns; track col.key) {
+      <div class="column">
+        <div class="column-header">
+          <span class="col-dot" [class]="'dot-' + col.key.toLowerCase()"></span>
+          <span class="col-title">{{ col.label }}</span>
+          <span class="col-count">{{ tasksByStatus()[col.key].length }}</span>
+        </div>
+
+        <div class="column-body">
+          @for (task of tasksByStatus()[col.key]; track task.id) {
+            <div class="task-card">
+              <h3>{{ task.titre }}</h3>
+              <p class="description">{{ task.description }}</p>
+              @if (task.createur && canManage()) {
+                <p class="creator">👤 {{ task.createur.prenom }} {{ task.createur.nom }}</p>
+              }
+
+              <div class="actions">
+                @if (isOwner(task) && task.statut === 'BROUILLON') {
+                  <a [routerLink]="['/taches', task.id, 'edit']">Modifier</a>
+                  <button (click)="submit(task)">Soumettre</button>
+                  <button class="danger" (click)="remove(task)">Suppr.</button>
+                }
+                @if (canManage() && task.statut === 'SOUMISE') {
+                  <button class="success" (click)="validate(task)">Valider</button>
+                  <button class="danger" (click)="reject(task)">Rejeter</button>
+                }
+              </div>
+            </div>
+          } @empty {
+            <p class="empty-column">Aucune tâche</p>
+          }
+        </div>
+      </div>
+    }
+  </div>
+}
