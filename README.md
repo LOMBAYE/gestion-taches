@@ -222,5 +222,4 @@ Inscrits via le script de seed `prisma/seed.ts` (mot de passe identique : `Passw
 ![alt text](image-1.png)
 
 **Gestion taches(vue colloborateur)**
-
-![alt text](image-2.png)
+![alt text](image.png)
