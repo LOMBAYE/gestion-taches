@@ -64,7 +64,7 @@ export class TaskListComponent implements OnInit {
   }
 
   canManage(): boolean {
-    return this.auth.hasRole('MANAGER', 'ADMINISTRATEUR');
+    return this.auth.hasRole('MANAGER');
   }
 
   submit(task: Task) {

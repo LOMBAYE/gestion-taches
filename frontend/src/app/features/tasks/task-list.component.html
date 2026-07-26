@@ -3,7 +3,8 @@
     <h1>{{ auth.hasRole('COLLABORATEUR') ? 'Mes tâches' : 'Toutes les tâches' }}</h1>
     <p class="subtitle">Suivez le cycle de vie de chaque tâche</p>
   </div>
-  <a class="btn-primary" routerLink="/taches/new">+ Nouvelle tâche</a>
+    @if(auth.hasRole('COLLABORATEUR')){
+  <a class="btn-primary" routerLink="/taches/new">+ Nouvelle tâche</a>}
 </div>
 
 @if (loading()) {
@@ -25,21 +26,23 @@
             <div class="task-card">
               <h3>{{ task.titre }}</h3>
               <p class="description">{{ task.description }}</p>
-              @if (task.createur && canManage()) {
+              @if (task.createur && (canManage() || auth.hasRole('ADMINISTRATEUR'))) {
                 <p class="creator">👤 {{ task.createur.prenom }} {{ task.createur.nom }}</p>
               }
 
-              <div class="actions">
-                @if (isOwner(task) && task.statut === 'BROUILLON') {
-                  <a [routerLink]="['/taches', task.id, 'edit']">Modifier</a>
-                  <button (click)="submit(task)">Soumettre</button>
-                  <button class="danger" (click)="remove(task)">Suppr.</button>
-                }
-                @if (canManage() && task.statut === 'SOUMISE') {
-                  <button class="success" (click)="validate(task)">Valider</button>
-                  <button class="danger" (click)="reject(task)">Rejeter</button>
-                }
-              </div>
+              @if ((auth.hasRole('COLLABORATEUR') && isOwner(task) && task.statut === 'BROUILLON') || (auth.hasRole('MANAGER') && task.statut === 'SOUMISE')) {
+                <div class="actions">
+                  @if (auth.hasRole('COLLABORATEUR') && isOwner(task) && task.statut === 'BROUILLON') {
+                    <a [routerLink]="['/taches', task.id, 'edit']">Modifier</a>
+                    <button (click)="submit(task)">Soumettre</button>
+                    <button class="danger" (click)="remove(task)">Suppr.</button>
+                  }
+                  @if (auth.hasRole('MANAGER') && task.statut === 'SOUMISE') {
+                    <button class="success" (click)="validate(task)">Valider</button>
+                    <button class="danger" (click)="reject(task)">Rejeter</button>
+                  }
+                </div>
+              }
             </div>
           } @empty {
             <p class="empty-column">Aucune tâche</p>

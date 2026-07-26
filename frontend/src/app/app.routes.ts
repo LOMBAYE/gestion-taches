@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard, adminGuard } from './core/guards/auth.guard';
+import { authGuard, adminGuard, collaborateurGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
@@ -30,11 +30,13 @@ export const routes: Routes = [
       },
       {
         path: 'taches/new',
+        canActivate: [collaborateurGuard],
         loadComponent: () =>
           import('./features/tasks/task-form.component').then((m) => m.TaskFormComponent),
       },
       {
         path: 'taches/:id/edit',
+        canActivate: [collaborateurGuard],
         loadComponent: () =>
           import('./features/tasks/task-form.component').then((m) => m.TaskFormComponent),
       },

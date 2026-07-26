@@ -22,7 +22,9 @@ export class LayoutComponent {
   initials(): string {
     const u = this.auth.currentUser();
     if (!u) return '?';
-    return `${u.prenom[0]}${u.nom[0]}`.toUpperCase();
+    const p = u.prenom ? u.prenom[0] : '';
+    const n = u.nom ? u.nom[0] : '';
+    return (`${p}${n}`.toUpperCase()) || '?';
   }
 
   roleLabel(): string {

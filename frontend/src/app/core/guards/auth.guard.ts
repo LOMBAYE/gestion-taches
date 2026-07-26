@@ -21,3 +21,14 @@ export const adminGuard: CanActivateFn = () => {
   router.navigate(['/dashboard']);
   return false;
 };
+
+export const collaborateurGuard: CanActivateFn = () => {
+  const auth = inject(AuthService);
+  const router = inject(Router);
+  if (auth.hasRole('COLLABORATEUR')) {
+    return true;
+  }
+  router.navigate(['/taches']);
+  return false;
+};
+

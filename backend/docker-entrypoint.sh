@@ -11,4 +11,8 @@ until npx prisma migrate deploy; do
   echo "DB pas prête (tentative $COUNT/$MAX_RETRIES), retry dans 2s..."
   sleep 2
 done
+
+echo "Exécution du script de seed Prisma..."
+npx prisma db seed || true
+
 exec node dist/main

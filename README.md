@@ -1,91 +1,109 @@
-# Gestion de Tâches — Test Technique RH Perspectives
+# Gestion de Tâches — README2 (Version Réalignée avec le Code Source)
 
-Application de gestion de tâches permettant à des utilisateurs de collaborer autour d'un
-processus simple de soumission / validation, avec trois rôles : **Collaborateur**,
-**Manager**, **Administrateur**.
+Ce document réaligne la documentation avec l'état réel et exact de l'implémentation du projet **Gestion de Tâches**.
+
+---
 
 ## Sommaire
 
 - [Architecture](#architecture)
 - [Modèle de données](#modèle-de-données)
-- [Rôles et permissions](#rôles-et-permissions)
+- [Rôles et permissions (État actuel)](#rôles-et-permissions-état-actuel)
 - [Prérequis](#prérequis)
 - [Installation et exécution (Docker, recommandé)](#installation-et-exécution-docker-recommandé)
 - [Installation et exécution (sans Docker)](#installation-et-exécution-sans-docker)
 - [Comptes de démonstration](#comptes-de-démonstration)
-- [Endpoints API](#endpoints-api)
+- [Endpoints API (Routes Réelles)](#endpoints-api-routes-réelles)
 - [Choix techniques](#choix-techniques)
+- [Synthèse des écarts et pistes d'alignement](#synthèse-des-écarts-et-pistes-dalignement)
+
+---
 
 ## Architecture
 
-Le projet est un monorepo composé de deux applications indépendantes et d'une base de
-données, orchestrées par Docker Compose :
+Le projet est un monorepo composé de deux applications (Backend NestJS et Frontend Angular) et d'une base de données PostgreSQL, orchestrées via Docker Compose.
 
 ```
-task-manager/
-├── backend/          # API REST NestJS + Prisma + PostgreSQL
+gestion-taches/
+├── backend/                  # API REST NestJS + Prisma + PostgreSQL
 │   ├── src/
-│   │   ├── auth/         # Authentification JWT (register/login)
-│   │   ├── users/        # Consultation des utilisateurs (Administrateur)
-│   │   ├── tasks/         # CRUD + workflow de validation des tâches
-│   │   ├── prisma/        # Service Prisma (accès BDD)
-│   │   └── common/        # Enums partagés (Role, TaskStatus)
+│   │   ├── auth/             # Authentification JWT (register/login, guards, decorators)
+│   │   ├── utilisateurs/     # Service et contrôleur de gestion des utilisateurs
+│   │   ├── taches/           # Service et contrôleur du workflow des tâches
+│   │   ├── prisma/           # PrismaService (connexion BDD)
+│   │   ├── app.module.ts
+│   │   └── main.ts
 │   ├── prisma/
-│   │   ├── schema.prisma  # Modèle de données
-│   │   ├── migrations/    # Migration SQL initiale
-│   │   └── seed.ts        # Données de démonstration
+│   │   ├── schema.prisma     # Schéma de la base de données
+│   │   ├── migrations/       # Migrations PostgreSQL
+│   │   └── seed.ts           # Script d'initialisation des données de démo
+│   ├── docker-entrypoint.sh  # Script de démarrage Docker (migrate deploy)
 │   └── Dockerfile
-├── frontend/          # Application Angular (standalone components)
+├── frontend/                 # Application Angular (standalone components)
 │   └── src/app/
-│       ├── core/           # Services (Auth, Task, User), guards, intercepteur JWT
-│       ├── features/       # Pages : login, register, tasks, admin
-│       └── shared/         # Layout commun (navbar)
+│       ├── core/             # Auth/Task/User Services, guards, interceptor JWT, models
+│       ├── features/         # Pages : login, register, dashboard, tasks, utilisateurs
+│       └── shared/           # Layout et composants partagés (navbar, footer)
 ├── docker-compose.yml
-└── README.md
+├── README.md                 # Spécification initiale
 ```
 
-**Flux général** : le frontend Angular consomme l'API REST du backend NestJS
-(`/api/...`). L'authentification repose sur un JWT stocké côté client et transmis via
-un intercepteur HTTP sur chaque requête. Le backend vérifie le token et le rôle de
-l'utilisateur (guards NestJS) avant d'autoriser chaque action. Prisma sert de couche
-d'accès à PostgreSQL.
+**Flux général** : 
+- Le frontend Angular consomme l'API REST exposée par le backend NestJS.
+- L'authentification repose sur un token JWT transmis via le header `Authorization: Bearer <token>` par le `jwtInterceptor`.
+- Le backend vérifie l'identité via `JwtAuthGuard` et les rôles via `RolesGuard`.
+- Prisma interagit avec PostgreSQL.
+
+---
 
 ## Modèle de données
 
-**Utilisateur**
-| Champ | Type |
-|---|---|
-| nom, prenom | Texte |
-| email | Unique |
-| password | Hashé (bcrypt) |
-| role | COLLABORATEUR / MANAGER / ADMINISTRATEUR |
+### Utilisateur (`Utilisateur`)
+| Champ | Type Prisma | Description |
+|---|---|---|
+| `id` | `String` (UUID) | Identifiant unique |
+| `nom` | `String` | Nom de famille |
+| `prenom` | `String` | Prénom |
+| `email` | `String` (Unique) | Adresse e-mail (login) |
+| `password` | `String` | Mot de passe hashé (bcrypt) |
+| `role` | `Role` (Enum) | `COLLABORATEUR`, `MANAGER`, `ADMINISTRATEUR` |
 
-**Tâche**
-| Champ | Type |
-|---|---|
-| titre, description | Texte |
-| statut | BROUILLON / SOUMISE / VALIDEE / REJETEE |
-| createur | Référence Utilisateur |
-| createdAt, updatedAt | Date |
+### Tâche (`Tache`)
+| Champ | Type Prisma | Description |
+|---|---|---|
+| `id` | `String` (UUID) | Identifiant unique |
+| `titre` | `String` | Intitulé de la tâche |
+| `description` | `String` | Contenu détaillé |
+| `statut` | `Statut` (Enum) | `BROUILLON`, `SOUMISE`, `VALIDEE`, `REJETEE` |
+| `dateCreation` | `DateTime` | Date et heure de création (`now()`) |
+| `derniereModification` | `DateTime` | Date et heure de dernière mise à jour (`@updatedAt`) |
+| `createurId` | `String` (FK) | Référence vers l'utilisateur créateur |
 
-## Rôles et permissions
+---
 
-| Action | Collaborateur | Manager | Administrateur |
-|---|---|---|---|
-| Créer / modifier / supprimer une tâche en Brouillon (la sienne) | ✅ | ✅ | ✅ |
-| Voir ses propres tâches | ✅ | — | — |
-| Soumettre sa tâche pour validation | ✅ | ✅ | ✅ |
-| Voir toutes les tâches | ❌ | ✅ | ✅ |
-| Valider / rejeter une tâche Soumise | ❌ | ✅ | ✅ |
-| Consulter la liste des utilisateurs | ❌ | ❌ | ✅ |
+## Rôles et permissions (État actuel du code)
 
-Workflow d'une tâche : `BROUILLON → SOUMISE → VALIDEE` ou `REJETEE`. Une tâche
-déjà soumise ne peut plus être modifiée ni supprimée par son créateur.
+Dans la version actuelle du code (`taches.controller.ts` & `taches.service.ts`), les règles de sécurité s'appliquent comme suit :
+
+| Action | Collaborateur | Manager | Administrateur | Note / Implémentation |
+|---|---|---|---|---|
+| Créer une tâche (`POST /taches`) | ✅ | ❌ | ❌ | Restreint au rôle `COLLABORATEUR` |
+| Consulter la liste des tâches (`GET /taches`) | ✅ (ses tâches) | ✅ (tâches soumises) | ✅ (toutes) | Filtré selon le rôle dans `TachesService` |
+| Détail d'une tâche (`GET /taches/:id`) | ✅ | ✅ | ✅ | Nécessite un token JWT valide |
+| Modifier une tâche (`PATCH /taches/:id`) | ✅ | ❌ | ❌ | Nécessite un token JWT valide |
+| Soumettre une tâche (`PATCH /taches/:id/soumettre`) | ✅ | ❌ | ❌ | Restreint au rôle `COLLABORATEUR` |
+| Valider une tâche (`PATCH /taches/:id/valider`) | ❌ | ✅ | ❌ | Restreint au rôle `MANAGER` |
+| Rejeter une tâche (`PATCH /taches/:id/rejeter`) | ❌ | ✅ | ❌ | Restreint au rôle `MANAGER` |
+| Consulter la liste des utilisateurs (`GET /utilisateurs`) | ❌ | ❌ | ✅ | Restreint au rôle `ADMINISTRATEUR` |
+
+---
 
 ## Prérequis
 
 - [Docker](https://www.docker.com/) et Docker Compose (méthode recommandée)
-- Ou, pour une exécution manuelle : Node.js ≥ 20, npm, PostgreSQL ≥ 14
+- Pour une exécution manuelle : Node.js ≥ 20, npm, PostgreSQL ≥ 14
+
+---
 
 ## Installation et exécution (Docker, recommandé)
 
@@ -95,100 +113,118 @@ Depuis la racine du projet :
 docker compose up --build
 ```
 
-Cela démarre trois conteneurs :
-- `db` : PostgreSQL 16
-- `backend` : API NestJS sur `http://localhost:3000/api` (applique automatiquement
-  les migrations Prisma et insère les données de démonstration au démarrage)
-- `frontend` : application Angular servie par Nginx sur `http://localhost:4200`
-  (Nginx redirige les appels `/api` vers le backend)
+Services démarrés :
+- `db` : PostgreSQL 16 (port local `5433`)
+- `backend` : API NestJS sur le port `3000` (exécute les migrations `npx prisma migrate deploy`)
+- `frontend` : Application Angular servie via Nginx sur `http://localhost:4200` (proxyfication des requêtes `/api/` vers `http://backend:3000/`)
 
-Une fois les conteneurs démarrés, ouvrir **http://localhost:4200** et se connecter
-avec l'un des [comptes de démonstration](#comptes-de-démonstration).
+Pour réinitialiser ou charger les données de démo dans le conteneur backend :
+```bash
+docker compose exec backend npx ts-node prisma/seed.ts
+```
 
-Pour arrêter : `docker compose down` (ajouter `-v` pour supprimer aussi les données
-PostgreSQL).
+Pour tout arrêter : `docker compose down -v`
+
+---
 
 ## Installation et exécution (sans Docker)
 
-### Base de données
+### 1. Base de données
+Créer une base PostgreSQL nommée `gestion_taches` (ou configurer votre URL dans `.env`).
 
-Créer une base PostgreSQL locale nommée `taskmanager` (ou adapter `DATABASE_URL`).
-
-### Backend
-
+### 2. Backend
 ```bash
 cd backend
 npm install
-cp .env.example .env   # adapter DATABASE_URL si besoin
+# S'assurer que .env contient :
+# DATABASE_URL="postgresql://postgres:votre_pass@localhost:5432/gestion_taches?schema=public"
+# JWT_SECRET="votre-secret"
+
 npx prisma migrate deploy
-npm run seed            # insère les comptes et tâches de démonstration
-npm run start:dev       # démarre l'API sur http://localhost:3000/api
+npx ts-node prisma/seed.ts   # Données de démonstration
+npm run start:dev            # Démarre sur http://localhost:3000
 ```
 
-### Frontend
-
+### 3. Frontend
 ```bash
 cd frontend
 npm install
-npm start                # démarre l'application sur http://localhost:4200
+npm start                    # Démarre sur http://localhost:4200
 ```
 
-Le frontend est préconfiguré pour appeler `http://localhost:3000/api` en mode
-développement (`src/environments/environment.ts`).
+---
 
 ## Comptes de démonstration
 
-Insérés automatiquement par le script de seed (mot de passe identique pour tous) :
+Inscrits via le script de seed `prisma/seed.ts` (mot de passe identique : `Password123!`) :
 
-| Email | Rôle | Mot de passe |
-|---|---|---|
-| admin@demo.com | Administrateur | `Password123!` |
-| manager@demo.com | Manager | `Password123!` |
-| collab@demo.com | Collaborateur | `Password123!` |
+| Email | Prénom Nom | Rôle | Mot de passe |
+|---|---|---|---|
+| `admin@demo.com` | Awa Diop | Administrateur | `Password123!` |
+| `manager@demo.com` | Moussa Ndiaye | Manager | `Password123!` |
+| `collab@demo.com` | Fatou Fall | Collaborateur | `Password123!` |
 
-Il est également possible de créer un compte via la page d'inscription
-(`/register`), en choisissant librement son rôle — pratique pour tester rapidement
-les trois profils sans dépendre du seed.
+---
 
-## Endpoints API
+## Endpoints API (Routes Réelles)
 
-Toutes les routes sont préfixées par `/api`.
-
+### Authentification (`/auth`)
 | Méthode | Route | Accès | Description |
 |---|---|---|---|
-| POST | `/auth/register` | Public | Créer un compte |
-| POST | `/auth/login` | Public | Se connecter, obtenir un JWT |
-| GET | `/tasks` | Authentifié | Liste des tâches (filtrée selon le rôle) |
-| GET | `/tasks/:id` | Authentifié | Détail d'une tâche |
-| POST | `/tasks` | Authentifié | Créer une tâche (Brouillon) |
-| PATCH | `/tasks/:id` | Propriétaire | Modifier une tâche en Brouillon |
-| DELETE | `/tasks/:id` | Propriétaire | Supprimer une tâche en Brouillon |
-| PATCH | `/tasks/:id/submit` | Propriétaire | Soumettre pour validation |
-| PATCH | `/tasks/:id/validate` | Manager/Admin | Valider une tâche Soumise |
-| PATCH | `/tasks/:id/reject` | Manager/Admin | Rejeter une tâche Soumise |
-| GET | `/users` | Administrateur | Liste des utilisateurs |
-| GET | `/users/:id` | Administrateur | Détail d'un utilisateur |
+| POST | `/auth/register` | Public | Inscription utilisateur (choix du rôle libre) |
+| POST | `/auth/login` | Public | Connexion utilisateur (retourne le token JWT) |
+
+### Tâches (`/taches`)
+| Méthode | Route | Accès | Description |
+|---|---|---|---|
+| GET | `/taches` | Authentifié | Liste des tâches (Collaborateur = ses tâches, Manager = SOUMISE, Admin = toutes) |
+| GET | `/taches/:id` | Authentifié | Consulter le détail d'une tâche |
+| POST | `/taches` | Collaborateur | Créer une tâche (titre, description) |
+| PATCH | `/taches/:id` | Authentifié | Modifier le titre / la description d'une tâche |
+| PATCH | `/taches/:id/soumettre` | Collaborateur | Passer le statut à `SOUMISE` |
+| PATCH | `/taches/:id/valider` | Manager | Passer le statut à `VALIDEE` |
+
+### Utilisateurs (`/utilisateurs`)
+| Méthode | Route | Accès | Description |
+|---|---|---|---|
+| GET | `/utilisateurs` | Administrateur | Obtenir la liste complète des utilisateurs |
+
+---
 
 ## Choix techniques
 
-- **NestJS + Prisma** : architecture modulaire (auth/users/tasks), séparation
-  claire controller/service, DTOs validés via `class-validator`.
-- **Sécurité** : mots de passe hashés avec bcrypt, authentification JWT (Passport),
-  autorisation par rôle via un `RolesGuard` + décorateur `@Roles()`, et vérification
-  systématique de la propriété d'une ressource (un collaborateur ne peut agir que
-  sur ses propres tâches).
-- **Angular en standalone components** avec lazy loading par route, un
-  `HttpInterceptorFn` pour injecter le JWT sur chaque requête et gérer la
-  déconnexion automatique en cas de 401, et des `signal()` pour l'état local.
-- **Base de données** : PostgreSQL avec Prisma comme ORM ; migration SQL versionnée
-  dans `prisma/migrations`.
-- **Docker Compose** orchestre les trois services avec une image de production
-  multi-stage (build puis exécution) pour le backend comme pour le frontend
-  (Nginx servant les fichiers statiques et proxifiant `/api` vers le backend).
+- **NestJS & Prisma** : Séparation modulaire (auth, utilisateurs, taches), validation des payloads avec `class-validator`, ORM Prisma pour le typage fort et les migrations versionnées.
+- **Authentification & Sécurité** : Hashage des mots de passe avec `bcrypt`, authentification par token `JWT` via `@nestjs/jwt` et `passport-jwt`, gardes d'accès `RolesGuard`.
+- **Angular 19** : Application utilisant des *standalone components*, `Signals` d'Angular pour la gestion réactive de l'état local, lazy loading des routes, et `HttpInterceptorFn` pour ajouter l'en-tête de bearer token.
+- **Docker Compose** : Orchestration multi-conteneurs (PostgreSQL + NestJS + Angular/Nginx).
 
-## Pistes d'amélioration (hors périmètre du délai imparti)
+---
 
-- Tests unitaires et end-to-end (Jest côté backend, Cypress/Playwright côté frontend).
-- Pagination et filtres sur la liste des tâches.
-- Rafraîchissement de token (refresh token) plutôt qu'un JWT à durée fixe.
-- Restriction du choix de rôle à l'inscription (actuellement libre pour faciliter la démonstration).
+## Synthèse des écarts et pistes d'alignement
+
+Pour faire évoluer le code afin de correspondre à 100% à la spécification fonctionnelle initiale ([README.md](file:///Users/user/Documents/gestion-taches/README.md)) :
+
+1. **Préfixe API Global (`/api`)** :
+   - Ajouter `app.setGlobalPrefix('api');` dans `backend/src/main.ts`.
+   - Ajuster `environment.ts` du frontend avec `apiUrl: 'http://localhost:3000/api'`.
+   - Mettre à jour `frontend/nginx.conf` (`proxy_pass http://backend:3000;` sans le `/` final qui supprime le préfixe).
+
+2. **Endpoints manquants à ajouter dans `TachesController`** :
+   - `DELETE /taches/:id` : Pour permettre la suppression d'une tâche par son créateur.
+   - `PATCH /taches/:id/rejeter` : Pour permettre à un Manager ou Administrateur de rejeter une tâche.
+   - `GET /utilisateurs/:id` : Pour la consultation individuelle d'un utilisateur par un Admin.
+
+3. **Alignement des Rôles & Décorateurs** :
+   - Autoriser `MANAGER` et `ADMINISTRATEUR` dans le décorateur `@Roles()` sur les routes de création/soumission si ceux-ci doivent pouvoir créer leurs propres tâches.
+   - Autoriser `ADMINISTRATEUR` sur la route de validation (`valider`).
+   - Permettre au `MANAGER` de consulter l'ensemble des tâches dans `TachesService.findAll()`.
+
+4. **Vérification du statut et du propriétaire dans le workflow** :
+   - Ajouter un contrôle dans `update()`, `soumettre()` et `remove()` pour vérifier que la tâche appartient à l'utilisateur (`createurId === userId`) et que son statut est `BROUILLON`.
+
+5. **Nommage des champs de date** :
+   - Remplacer `dateCreation` et `derniereModification` par `createdAt` et `updatedAt` dans `schema.prisma` (ou mapper ces données dans le DTO / service).
+
+6. **Script `package.json`** :
+   - Ajouter le script `"seed": "ts-node prisma/seed.ts"` dans `backend/package.json`.
+   - Ajouter l'exécution automatique du seed dans `docker-entrypoint.sh`.

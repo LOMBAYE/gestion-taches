@@ -7,9 +7,17 @@
     <input
       class="search"
       type="text"
-      placeholder="🔍 Rechercher..."
-      [value]="search()"
-      (input)="search.set($any($event.target).value)"
+      placeholder="🔍 Rechercher un utilisateur..."
+      [value]="userSearch()"
+      (input)="onUserSearchChange($any($event.target).value)"
+    />
+  } @else {
+    <input
+      class="search"
+      type="text"
+      placeholder="🔍 Rechercher une tâche..."
+      [value]="taskSearch()"
+      (input)="onTaskSearchChange($any($event.target).value)"
     />
   }
 </div>
@@ -25,8 +33,15 @@
   <div class="table-card">
     @if (tab() === 'users') {
       <table>
+        <thead>
+          <tr>
+            <th>Utilisateur</th>
+            <th>Email</th>
+            <th>Rôle</th>
+          </tr>
+        </thead>
         <tbody>
-          @for (u of filteredUsers(); track u.id) {
+          @for (u of paginatedUsers(); track u.id; let i = $index) {
             <tr>
               <td>
                 <div class="user-cell">
@@ -42,23 +57,129 @@
           }
         </tbody>
       </table>
+
+      @if (filteredUsers().length > 0) {
+        <div class="pagination-footer">
+          <div class="pagination-info">
+            Affichage de <strong>{{ userStartIndex() }}</strong> à <strong>{{ userEndIndex() }}</strong> sur <strong>{{ filteredUsers().length }}</strong> utilisateurs
+          </div>
+
+          <div class="pagination-controls">
+            <div class="per-page">
+              <label for="userPerPageSelect">Par page :</label>
+              <select
+                id="userPerPageSelect"
+                [value]="userItemsPerPage()"
+                (change)="onUserPerPageChange(+$any($event.target).value)"
+              >
+                @for (opt of perPageOptions; track opt) {
+                  <option [value]="opt">{{ opt }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="pagination-nav">
+              <button
+                class="btn-page-nav"
+                [disabled]="userCurrentPage() === 1"
+                (click)="previousUserPage()"
+              >
+                ‹ Précédent
+              </button>
+
+              @for (p of userPagesArray(); track p) {
+                <button
+                  class="btn-page-num"
+                  [class.active]="p === userCurrentPage()"
+                  (click)="goToUserPage(p)"
+                >
+                  {{ p }}
+                </button>
+              }
+
+              <button
+                class="btn-page-nav"
+                [disabled]="userCurrentPage() === userTotalPages()"
+                (click)="nextUserPage()"
+              >
+                Suivant ›
+              </button>
+            </div>
+          </div>
+        </div>
+      }
     } @else {
       <table>
         <thead>
-          <tr><th>Titre</th><th>Créateur</th><th>Statut</th></tr>
+          <tr>
+            <th>Titre</th>
+            <th>Créateur</th>
+            <th>Statut</th>
+          </tr>
         </thead>
         <tbody>
-          @for (t of tasks(); track t.id) {
+          @for (t of paginatedTasks(); track t.id; let i = $index) {
             <tr>
               <td>{{ t.titre }}</td>
               <td class="muted">{{ t.createur?.prenom }} {{ t.createur?.nom }}</td>
               <td><span class="status-badge" [class]="'status-' + t.statut.toLowerCase()">{{ statusLabel(t.statut) }}</span></td>
             </tr>
           } @empty {
-            <tr><td colspan="3" class="empty">Aucune tâche.</td></tr>
+            <tr><td colspan="4" class="empty">Aucune tâche trouvée.</td></tr>
           }
         </tbody>
       </table>
+
+      @if (filteredTasks().length > 0) {
+        <div class="pagination-footer">
+          <div class="pagination-info">
+            Affichage de <strong>{{ taskStartIndex() }}</strong> à <strong>{{ taskEndIndex() }}</strong> sur <strong>{{ filteredTasks().length }}</strong> tâches
+          </div>
+
+          <div class="pagination-controls">
+            <div class="per-page">
+              <label for="taskPerPageSelect">Par page :</label>
+              <select
+                id="taskPerPageSelect"
+                [value]="taskItemsPerPage()"
+                (change)="onTaskPerPageChange(+$any($event.target).value)"
+              >
+                @for (opt of perPageOptions; track opt) {
+                  <option [value]="opt">{{ opt }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="pagination-nav">
+              <button
+                class="btn-page-nav"
+                [disabled]="taskCurrentPage() === 1"
+                (click)="previousTaskPage()"
+              >
+                ‹ Précédent
+              </button>
+
+              @for (p of taskPagesArray(); track p) {
+                <button
+                  class="btn-page-num"
+                  [class.active]="p === taskCurrentPage()"
+                  (click)="goToTaskPage(p)"
+                >
+                  {{ p }}
+                </button>
+              }
+
+              <button
+                class="btn-page-nav"
+                [disabled]="taskCurrentPage() === taskTotalPages()"
+                (click)="nextTaskPage()"
+              >
+                Suivant ›
+              </button>
+            </div>
+          </div>
+        </div>
+      }
     }
   </div>
 }

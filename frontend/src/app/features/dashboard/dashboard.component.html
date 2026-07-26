@@ -3,7 +3,9 @@
     <h1>Bonjour {{ auth.currentUser()?.prenom }} 👋</h1>
     <p class="subtitle">Voici un aperçu de votre activité</p>
   </div>
-  <a class="btn-primary" routerLink="/taches/new">+ Nouvelle tâche</a>
+  @if(auth.hasRole('COLLABORATEUR')){
+    <a class="btn-primary" routerLink="/taches/new">+ Nouvelle tâche</a>
+ }
 </div>
 
 @if (loading()) {
