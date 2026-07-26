@@ -215,7 +215,7 @@ Inscrits via le script de seed `prisma/seed.ts` (mot de passe identique : `Passw
 ---
 
 **Page Login**
-![alt text](image-2.png)
+![alt text](image-4.png)
 
 **Dashboard (vue admin)**
 
@@ -223,4 +223,4 @@ Inscrits via le script de seed `prisma/seed.ts` (mot de passe identique : `Passw
 
 **Gestion taches(vue colloborateur)**
 
-![alt text](image-3.png)
+![alt text](image-2.png)
