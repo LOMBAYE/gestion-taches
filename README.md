@@ -9,15 +9,15 @@ processus simple de soumission / validation, avec trois rôles : **Collaborateur
 ## Sommaire
 
 - [Architecture](#architecture)
+- [Stack technique](#stack-technique)
 - [Modèle de données](#modèle-de-données)
-- [Rôles et permissions (État actuel)](#rôles-et-permissions-état-actuel)
+- [Rôles et permissions](#rôles-et-permissions)
 - [Prérequis](#prérequis)
 - [Installation et exécution (Docker, recommandé)](#installation-et-exécution-docker-recommandé)
 - [Installation et exécution (sans Docker)](#installation-et-exécution-sans-docker)
 - [Comptes de démonstration](#comptes-de-démonstration)
-- [Endpoints API (Routes Réelles)](#endpoints-api-routes-réelles)
+- [Endpoints API](#endpoints-api)
 - [Choix techniques](#choix-techniques)
-
 ---
 
 ## Architecture
@@ -56,7 +56,8 @@ gestion-taches/
 │       ├── features/         # Pages : login, register, dashboard, tasks, utilisateurs
 │       └── shared/           # Layout et composants partagés (navbar, footer)
 ├── docker-compose.yml
-├── 
+└── README.md
+```
 
 **Flux général** : 
 
@@ -93,7 +94,7 @@ gestion-taches/
 
 ---
 
-## Rôles et permissions (État actuel du code)
+## Rôles et permissions
 
 | Action | Collaborateur | Manager | Administrateur | Implémentation |
 |---|---|---|---|---|
@@ -177,7 +178,7 @@ Inscrits via le script de seed `prisma/seed.ts` (mot de passe identique : `Passw
 
 ---
 
-## Endpoints API 
+## Endpoints API
 
 ### Authentification (`/auth`)
 | Méthode | Route | Accès | Description |
